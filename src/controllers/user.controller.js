@@ -5,6 +5,42 @@ import {uploadOnCloudinary} from '../utils/cloudinary.js';
 import {ApiResponse} from "../utils/ApiResponse.js" ;
 import jwt from 'jsonwebtoken'
 
+const registerUser = async (req, res) => {
+    try {
+        const { username, email, password } = req.body;
+
+        if (!username || !email || !password) {
+            throw new Error('All fields are required');
+        }
+
+        const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+        if (existingUser) throw new Error('User already exists');
+
+        const avatarFile = req.files.avatar ? req.files.avatar[0] : null;
+        const coverImageFile = req.files.coverImage ? req.files.coverImage[0] : null;
+
+       // if (!avatarFile) throw new Error('No avatar found');
+
+        const avatarUrl = avatarFile ? await uploadOnCloudinary(avatarFile.path) : "https://res.cloudinary.com/df4lo119r/image/upload/v1722937958/k5qdozx609xkq8seywht.png";
+        const coverImageUrl = coverImageFile ? await uploadOnCloudinary(coverImageFile.path) : "https://res.cloudinary.com/df4lo119r/image/upload/v1722937959/awfd5a4waqft2fymgxt6.webp";
+
+        const user = await User.create({
+            username: username.toLowerCase(),
+            email,
+            password,
+            avatar: avatarUrl,
+            coverImage: coverImageUrl,
+        });
+
+        const currentUser = await User.findById(user._id).select('-password -refreshToken');
+        if (!currentUser) throw new Error('Error while creating user');
+
+        return res.status(201).json({ statusCode: 200, data: currentUser, message: 'User successfully registered' });
+    } catch (error) {
+        res.status(500).send(`Error: ${error.message}`);
+    }
+};
+  
 const generateAccessAndRefreshToken = async (userId) => {
     try {
         const user = await User.findById(userId);
@@ -21,59 +57,8 @@ const generateAccessAndRefreshToken = async (userId) => {
 
 }
 
-const registerUser = asyncHandler(async (req  , res) => {
-    const {username , email , password , fullName } = req.body
-            //console.log( "REQUEST BODY :- ",req.body)
-    // if (fullName === "")  ApiError(400 , "fullName is required")
-        //Or
-    if ([username, email, password , fullName].some((field) => field?.trim() === "")
-    ){
-        throw new ApiError(400 , "All fields must require")
-    }
-    const existingUser = await User.findOne({ $or:[{username} ,{email}]})
-    if (existingUser) throw new ApiError(409 , "User is already exist")
-
-    const avatarLocalPath = req.files?.avatar[0]?.path ;
-        //const coverImageLocalPath = req.files?.coverImage[0]?.path;
-    let coverImageLocalPath ; 
-    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) { 
-        coverImageLocalPath = req.files.coverImage[0]?.path;
-    }
-
-                //console.log( " FILES DATA ",req.files)
-    if(!avatarLocalPath ) throw new ApiError(400,"No images found")
-    
-    const avatar = await uploadOnCloudinary(avatarLocalPath) ;
-    const coverImage = await uploadOnCloudinary(coverImageLocalPath) ;
-    
-    
-    if (!avatar.url) throw new ApiError(400,"No avatar image found");
-
-    const user = await User.create({
-        username : username.toLowerCase(),
-        email,
-        password,
-        fullName,
-        avatar: avatar.url,
-        coverImage: coverImage?.url || "",
-    })
-
-    const currentUser = await User.findById(user._id).select(
-        "-password -refreshToken"
-    )
-    if (!currentUser) throw new ApiError(500 , "error while creating user")
-
-    return res.status(201).json(
-        new ApiResponse(200 , "User successfully registered")
-    )
-})
-
 const loginUser = asyncHandler(async (req, res) => {
-
     const {username , email, password} = req.body
-    console.log(username)
-    console.log(email)
-
     if (!(username || email)) {
         throw new ApiError(400, "Username or email are required")
     }
@@ -87,7 +72,6 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new ApiError(401, "Invalid credentials")
     }
     const {accessToken , refreshToken} = await generateAccessAndRefreshToken(user._id);
-    
     const loggedInUser = await User.findById(user._id).
         select("-password -refreshToken")
     
@@ -101,7 +85,7 @@ const loginUser = asyncHandler(async (req, res) => {
     .cookie("refreshToken" , refreshToken , options)
     .json( new ApiResponse( 200 , { 
                     user: loggedInUser , accessToken , refreshToken 
-                }, "User logged I  n successfully"))
+                }, "User logged In successfully"))
 })
 
 const logoutUser = asyncHandler (async (req , res) => {
@@ -130,12 +114,10 @@ const logoutUser = asyncHandler (async (req , res) => {
 })
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
-    
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken    
     if (!incomingRefreshToken) {
         throw new ApiError(401 , "unauthorized request")
     }
-
     try {
             
         const decodedToken = jwt.verify(incomingRefreshToken  , process.env.REFRESH_TOKEN_SECRET)
@@ -164,15 +146,13 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     catch (error) {
         throw new ApiError(401 , error?.message || "invalid refresh token")
     }
-
-
 })
 
 const changeCurrentPassword = asyncHandler(async(req, res) => {
     const {oldPassword, newPassword} = req.body 
 
     const user= await User.findById(req.user?._id)
-    const isPasswordCorrect = await User.isPasswordCorrect(oldPassword)  
+    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)  
 
     if (!isPasswordCorrect) {
         throw new ApiError(401, "Old password is incorrect")
@@ -186,7 +166,6 @@ const changeCurrentPassword = asyncHandler(async(req, res) => {
     ) 
 })
  
-
 const getCurrentUser = asyncHandler(async (req, res) => {
     return res
     .status(200).json(
@@ -382,5 +361,6 @@ const getWatchHistory = asyncHandler(async (req, res) => {
     .json (new ApiResponse (200 , user[0].watchHistory , "watch History fetched successfully"))
 })
 
+
 export {registerUser , loginUser , logoutUser , refreshAccessToken , changeCurrentPassword ,
-     getCurrentUser , updateAvatar , updateAccountDetails , getUserChannelProfile , getWatchHistory}
+     getCurrentUser , updateAvatar , updateCoverImage, updateAccountDetails , getUserChannelProfile , getWatchHistory }

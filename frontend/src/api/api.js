@@ -23,7 +23,7 @@ async function signUpUser(formData) {
 
 const jsonAxiosInstance = axios.create({
     baseURL: API_URL,
-    timeout: 15000,
+    timeout: 25000,
     headers: {
         'Content-Type': 'application/json',
     },

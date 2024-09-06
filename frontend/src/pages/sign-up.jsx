@@ -4,6 +4,7 @@ import { signUpUser } from '../api/api';
 import logo from '../../public/boy.png';
 import bg from '../../public/coverImage.webp';
 import { useNavigate } from 'react-router-dom';
+import { FcGoogle } from "react-icons/fc";
 
 const Page = () => {
     const [email, setEmail] = useState('');
@@ -15,6 +16,7 @@ const Page = () => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
+
 
     const togglePassword = () => {
         setShowPassword(!showPassword);
@@ -43,11 +45,12 @@ const Page = () => {
             reader.readAsDataURL(file);
         }
     };
+
     const navigate = useNavigate();
 
     const handleClick = async () => {
         setError('');
-        if (!email ||!password ||!username) {
+        if (!email || !password || !username) {
             setError('All fields are required');
             return;
         }
@@ -70,7 +73,7 @@ const Page = () => {
             const response = await signUpUser(formData);
             if (response.statusCode === 200) {
                 console.log(response);
-                navigate("/login")
+                navigate("/login");
             } else {
                 setError('Internal Server Error');
             }
@@ -80,10 +83,14 @@ const Page = () => {
         }
     };
 
+    const handleGoogleLogin = () => {
+        window.location.href = 'http://localhost:8000/auth/google';
+    };
+
     return (
         <div className='h-screen flex flex-col justify-center items-center'>
             <h1 className='text-4xl mb-4'>SignUp</h1>
-            <div className='items-center justify-center px-10 py-10 rounded-xl bg-gray-800 gap-3'>
+            <div className=' shadow-lg shadow-purple-400 items-center justify-center px-10 py-10 rounded-xl bg-gray-800 gap-2'>
                 
                 <div className='flex flex-col items-center mb-2 '>
                     <label htmlFor='coverImage' className='cursor-pointer'>
@@ -149,16 +156,26 @@ const Page = () => {
                     >
                         {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </span>
-
                 </div>
 
-                {error && <div className='text-red-500'>{error}</div>}
+                {error && <div className='flex justify-center text-red-500'>{error}</div>}
+                <div className='flex-col justify-center items-center gap-1 '>
                 <div className='flex justify-center p-1'>
                     <button
-                        className='bg-red-700 text-lg hover:bg-purple-500 text-black font-bold rounded-xl px-3 py-2'
+                        className='bg-red-600 text-lg hover:bg-red-700 text-black font-bold rounded-xl px-3 py-2'
                         onClick={handleClick}
-                    > SignUp
+                    >
+                        SignUp
                     </button>
+                </div>
+                <p className='flex justify-center'>or</p>
+                <div className='flex justify-center p-1'>
+                    <button
+                        className='  bg-black hover:bg-gray-950 px-3 py-3  rounded-xl '
+                        onClick={handleGoogleLogin}
+                    >   <FcGoogle/>
+                    </button>
+                </div>
                 </div>
                 <div className='mt-2 text-base'>
                     <h2 className='text-gray-400 font-serif text-sm'>

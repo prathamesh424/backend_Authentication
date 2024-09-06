@@ -95,12 +95,6 @@ const MobileMenu = styled.ul`
         opacity:${({isOpen}) => (isOpen ? "100%" : "0")};
         z-index: ${({isOpen}) => (isOpen ? "1000" : "-1000")};
 `;
-
-
-
-
-
-
 const Navbar = () => {
     const [isOpen , setIsOpen] = useState(false) ;
 
@@ -114,20 +108,20 @@ const Navbar = () => {
 
         <NavItems>
             <NavLink href = "#About">About</NavLink>
-            <NavLink href = "#Skills">Skills</NavLink>
-            <NavLink href = "#Experience">Experience</NavLink>
-            <NavLink href = "#Projects">Projects</NavLink>
-            <NavLink href = "#Education">Education</NavLink>
+            <NavLink href = "#About">About</NavLink>
+            <NavLink href = "#about">about</NavLink>
+            <NavLink href = "#About">About</NavLink>
+            <NavLink href = "#Contact">Contact</NavLink>
         </NavItems>
 
 
         {
             isOpen &&   <MobileMenu isOpen= {isOpen}>
                                 <NavLink href = "#About">About</NavLink>
-                                <NavLink href = "#Skills">Skills</NavLink>
-                                <NavLink href = "#Experience">Experience</NavLink>
-                                <NavLink href = "#Projects">Projects</NavLink>
-                                <NavLink href = "#Education">Education</NavLink>
+                                <NavLink href = "#About">About</NavLink>
+                                <NavLink href = "#about">about</NavLink>
+                                <NavLink href = "#About">About</NavLink>
+                                <NavLink href = "#Contact">Contact</NavLink>
                         </MobileMenu>          
         }
  

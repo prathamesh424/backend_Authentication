@@ -35,14 +35,14 @@ function App() {
         <Routes>
           <Route path="/sign-up" element={<SignUpPage />} />
           <Route path="/login" element={<Login setUserAuthenticated={setUserAuthenticated} />} />
-{/*         
+        
           <Route path='/'  >
            <Route index element={<Home/>} />
-          </Route> */}
-          
+          </Route>
+{/*           
         <Route path='/' element={<AuthRoute isUserAuthenticated={isUserAuthenticated} />} >
           <Route index element={<Home/>} />
-        </Route>
+        </Route> */}
 
         <Route path='/otp-verification' element={<OTPVerification />} />
         </Routes>

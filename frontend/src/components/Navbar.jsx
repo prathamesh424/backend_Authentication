@@ -3,8 +3,6 @@ import styled from 'styled-components' ;
 import {Link as LinkR,  } from 'react-router-dom';
 import { MenuRounded} from '@mui/icons-material' ;
  
-
-
 const Nav = styled.div`
     background-color: inherit;
     height:80px;
@@ -95,6 +93,7 @@ const MobileMenu = styled.ul`
         opacity:${({isOpen}) => (isOpen ? "100%" : "0")};
         z-index: ${({isOpen}) => (isOpen ? "1000" : "-1000")};
 `;
+
 const Navbar = () => {
     const [isOpen , setIsOpen] = useState(false) ;
 

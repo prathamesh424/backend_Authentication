@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import  { useContext } from 'react';
 import logo from '../../public/boy.png';
 import bg from '../../public/coverImage.webp';
 import { DataContext } from '../context/DataProvider';
